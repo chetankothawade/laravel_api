@@ -1,4 +1,4 @@
-﻿# eSign Backend API
+﻿# Backend API
 
 Laravel-based backend API for the Signature Tool application.
 
