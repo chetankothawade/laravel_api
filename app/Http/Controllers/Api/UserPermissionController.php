@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UserPermission\UserPermissionToggleRequest;
 use App\Http\Requests\Api\UserPermission\UserPermissionUserRequest;
+use App\Enums\YesNoFlag;
 use App\Http\Resources\SidebarMenuItemResource;
 use App\Http\Resources\UserModuleAccessResource;
 use App\Http\Resources\UserPermissionMatrixResource;
@@ -89,7 +90,7 @@ class UserPermissionController extends Controller
 
         return $this->safeExecute('messages.user_permission_matrix_success', function () use ($user) {
             return new UserPermissionMatrixResource(
-                $this->service->getModulePermissionMatrix($user->id, 'Y')
+                $this->service->getModulePermissionMatrix($user->id, YesNoFlag::YES->value)
             );
         });
     }

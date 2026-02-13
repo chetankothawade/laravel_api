@@ -1,8 +1,10 @@
 <?php
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -32,56 +34,89 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Throwable $e, $request) {
+        $exceptions->render(function (ValidationException $e, Request $request) {
             if (! $request->expectsJson()) {
                 return null;
             }
 
-            if ($e instanceof ValidationException) {
-                return response()->json([
-                    'status' => false,
-                    'message' => __('messages.validation_failed'),
-                    'errors' => $e->errors(),
-                    'code' => 422,
-                ], 422);
-            }
+            return response()->json([
+                'status' => false,
+                'message' => __('messages.validation_failed'),
+                'errors' => $e->errors(),
+                'code' => 422,
+            ], 422);
+        });
 
-            if ($e instanceof AuthenticationException) {
-                return response()->json([
-                    'status' => false,
-                    'message' => __('messages.unauthenticated'),
-                    'code' => 401,
-                ], 401);
-            }
-
-            if ($e instanceof ModelNotFoundException) {
-                return response()->json([
-                    'status' => false,
-                    'message' => __('messages.record_not_found'),
-                    'code' => 404,
-                ], 404);
-            }
-
-            if ($e instanceof NotFoundHttpException) {
-                return response()->json([
-                    'status' => false,
-                    'message' => __('messages.endpoint_not_found'),
-                    'code' => 404,
-                ], 404);
-            }
-
-            if ($e instanceof MethodNotAllowedHttpException) {
-                return response()->json([
-                    'status' => false,
-                    'message' => __('messages.method_not_allowed'),
-                    'code' => 405,
-                ], 405);
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
             }
 
             return response()->json([
                 'status' => false,
-                'message' => $e->getMessage(),
-                'code' => $e->getCode() ?: 500,
+                'message' => __('messages.unauthenticated'),
+                'code' => 401,
+            ], 401);
+        });
+
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => __('messages.record_not_found'),
+                'code' => 404,
+            ], 404);
+        });
+
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => __('messages.endpoint_not_found'),
+                'code' => 404,
+            ], 404);
+        });
+
+        $exceptions->render(function (MethodNotAllowedHttpException $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => __('messages.method_not_allowed'),
+                'code' => 405,
+            ], 405);
+        });
+
+        $exceptions->render(function (\DomainException $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage() !== '' ? $e->getMessage() : __('messages.invalid'),
+                'code' => 422,
+            ], 422);
+        });
+
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            $isLocal = app()->environment('local');
+            return response()->json([
+                'status' => false,
+                'message' => $isLocal ? $e->getMessage() : __('messages.something_went_wrong'),
+                'code' => 500,
             ], 500);
         });
     })

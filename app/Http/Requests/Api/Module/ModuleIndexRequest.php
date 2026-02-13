@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api\Module;
 
+use App\Enums\ActiveInactiveStatus;
 use App\Http\Requests\Api\BaseApiRequest;
 
 class ModuleIndexRequest extends BaseApiRequest
@@ -11,7 +12,7 @@ class ModuleIndexRequest extends BaseApiRequest
         return [
             'page' => 'nullable|integer|min:1',
             'search' => 'nullable|string|max:255',
-            'status' => 'nullable|in:active,inactive',
+            'status' => 'nullable|in:' . implode(',', ActiveInactiveStatus::values()),
             'sortedField' => 'nullable|in:id,name,created_at,status,icon,url,seq_no',
             'sortedBy' => 'nullable|in:asc,desc',
             'perPage' => 'nullable|integer|min:1|max:100',

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\ActiveInactiveStatus;
+use App\Enums\PermissionAction;
+use App\Enums\UserRole;
+use App\Enums\YesNoFlag;
 use App\Models\Module;
 use App\Models\ModulePermission;
 use App\Models\Permission;
@@ -56,13 +60,13 @@ class ModuleService
         return DB::transaction(function () use ($data) {
 
             // Create module
-            $data['parent_id'] = $data['parent_id'] == 0 ? NULL : $data['parent_id'];
+            $data['parent_id'] = $data['parent_id'] == 0 ? null : $data['parent_id'];
             $module = Module::create($data);
 
-            if ($data['is_sub_module'] === 'N') {
+            if ($data['is_sub_module'] === YesNoFlag::NO->value) {
 
                 // Fetch CRUD permissions
-                $permissions = Permission::whereIn('action', ['view', 'create', 'edit', 'delete', 'status'])->get();
+                $permissions = Permission::whereIn('action', PermissionAction::defaults())->get();
 
                 // Insert permission mapping
                 foreach ($permissions as $perm) {
@@ -75,7 +79,7 @@ class ModuleService
                 // Insert Role mapping for Super Admin
                 RoleModule::create([
                     'module_id'     => $module->id,
-                    'role'          => "super_admin",
+                    'role'          => UserRole::SUPER_ADMIN->value,
                 ]);
             }
 
@@ -97,9 +101,9 @@ class ModuleService
             // Fetch existing permission mappings
             $existingMappings = ModulePermission::where('module_id', $module->id)->get();
             // Create default CRUD mappings if none exist and permissions are enabled.
-            if ($existingMappings->isEmpty() && ($data['is_permission'] ?? $module->is_permission) === 'Y') {
+            if ($existingMappings->isEmpty() && ($data['is_permission'] ?? $module->is_permission) === YesNoFlag::YES->value) {
 
-                $permissions = Permission::whereIn('action',  ['view', 'create', 'edit', 'delete', 'status'])->get();
+                $permissions = Permission::whereIn('action', PermissionAction::defaults())->get();
 
                 foreach ($permissions as $perm) {
                     ModulePermission::create([
@@ -132,7 +136,9 @@ class ModuleService
      */
     public function toggleStatus(Module $module): Module
     {
-        $newStatus = $module->status === 'active' ? 'inactive' : 'active';
+        $newStatus = $module->status === ActiveInactiveStatus::ACTIVE->value
+            ? ActiveInactiveStatus::INACTIVE->value
+            : ActiveInactiveStatus::ACTIVE->value;
 
         activity()->withoutLogs(function () use ($module, $newStatus) {
             $module->status = $newStatus;
@@ -140,7 +146,7 @@ class ModuleService
         });
 
         $module = $module->fresh();
-        $event = $newStatus === 'active' ? 'activated' : 'deactivated';
+        $event = $newStatus === ActiveInactiveStatus::ACTIVE->value ? 'activated' : 'deactivated';
         $this->activityLogger()->log('module', $module, $event, [
             'status' => $newStatus,
         ]);
@@ -157,7 +163,7 @@ class ModuleService
             $q->where('parent_id', 0)
                 ->orWhereNull('parent_id');
         })
-            ->where('is_sub_module', 'Y')
+            ->where('is_sub_module', YesNoFlag::YES->value)
             ->get();
     }
 

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\ActiveInactiveStatus;
+use App\Enums\YesNoFlag;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -19,9 +21,9 @@ class ModuleSeeder extends Seeder
                 'url'            => '/dashboard',
                 'icon'           => 'Home',
                 'seq_no'         => 1,
-                'is_sub_module'  => 'N',
-                'status'         => 'active',
-                'is_permission'  => 'N',
+                'is_sub_module'  => YesNoFlag::NO->value,
+                'status'         => ActiveInactiveStatus::ACTIVE->value,
+                'is_permission'  => YesNoFlag::NO->value,
                 'created_at'     => Carbon::now(),
                 'updated_at'     => Carbon::now(),
             ],
@@ -32,9 +34,9 @@ class ModuleSeeder extends Seeder
                 'url'            => '/user',
                 'icon'           => 'Users',
                 'seq_no'         => 2,
-                'is_sub_module'  => 'N',
-                'status'         => 'active',
-                'is_permission'  => 'Y',
+                'is_sub_module'  => YesNoFlag::NO->value,
+                'status'         => ActiveInactiveStatus::ACTIVE->value,
+                'is_permission'  => YesNoFlag::YES->value,
                 'created_at'     => Carbon::now(),
                 'updated_at'     => Carbon::now(),
             ],

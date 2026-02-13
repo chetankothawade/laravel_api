@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\ActiveInactiveStatus;
+use App\Enums\PermissionAction;
+use App\Enums\YesNoFlag;
 use App\Models\Module;
 use App\Models\UserPermission;
 use Illuminate\Support\Facades\DB;
@@ -33,7 +36,7 @@ class UserPermissionService
     /**
      * Build full module -> permissions -> userPermissions matrix.
      */
-    public function getModulePermissionMatrix(int $userId, string $isPermission = 'N'): array
+    public function getModulePermissionMatrix(int $userId, string $isPermission = YesNoFlag::NO->value): array
     {
         $user = DB::table('users')->select('id', 'role')->where('id', $userId)->first();
 
@@ -51,11 +54,11 @@ class UserPermissionService
                 $join->on('up.module_permission_id', '=', 'mp.id')
                     ->where('up.user_id', '=', $userId);
             })
-            ->where('m.status', 'active')
-            ->where('p.status', 'active');
+            ->where('m.status', ActiveInactiveStatus::ACTIVE->value)
+            ->where('p.status', ActiveInactiveStatus::ACTIVE->value);
 
-        if ($isPermission === 'Y') {
-            $query->where('m.is_permission', 'Y');
+        if ($isPermission === YesNoFlag::YES->value) {
+            $query->where('m.is_permission', YesNoFlag::YES->value);
         }
 
         $rows = $query
@@ -204,7 +207,7 @@ class UserPermissionService
             ->toArray();
 
         // 2) Get full permission matrix
-        $matrix = $this->getModulePermissionMatrix($userId, 'N');
+        $matrix = $this->getModulePermissionMatrix($userId, YesNoFlag::NO->value);
 
         // 3) Filter modules by role first
         $modules = array_filter($matrix['modules'], function ($m) use ($roleModuleIds) {
@@ -232,7 +235,7 @@ class UserPermissionService
                 if (! empty($perm['modulePermissionId'])) {
                     $configuredPermissionIds[] = $perm['modulePermissionId'];
                 }
-                if ($perm['action'] === 'view') {
+                if ($perm['action'] === PermissionAction::VIEW->value) {
                     $viewMPId = $perm['modulePermissionId'];
                 }
             }

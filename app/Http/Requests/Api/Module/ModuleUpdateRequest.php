@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Api\Module;
 
+use App\Enums\ActiveInactiveStatus;
+use App\Enums\YesNoFlag;
 use App\Http\Requests\Api\BaseApiRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,9 +24,9 @@ class ModuleUpdateRequest extends BaseApiRequest
             'url' => 'nullable|string|max:255',
             'icon' => 'nullable|string|max:255',
             'seq_no' => 'nullable|integer',
-            'is_sub_module' => 'sometimes|required|in:Y,N',
-            'is_permission' => 'sometimes|required|in:Y,N',
-            'status' => 'sometimes|required|in:active,inactive',
+            'is_sub_module' => 'sometimes|required|in:' . implode(',', YesNoFlag::values()),
+            'is_permission' => 'sometimes|required|in:' . implode(',', YesNoFlag::values()),
+            'status' => 'sometimes|required|in:' . implode(',', ActiveInactiveStatus::values()),
         ];
     }
 }

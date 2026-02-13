@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Api\Module;
 
+use App\Enums\ActiveInactiveStatus;
+use App\Enums\YesNoFlag;
 use App\Http\Requests\Api\BaseApiRequest;
 
 class ModuleStoreRequest extends BaseApiRequest
@@ -14,9 +16,9 @@ class ModuleStoreRequest extends BaseApiRequest
             'url' => 'nullable|string|max:255',
             'icon' => 'nullable|string|max:255',
             'seq_no' => 'nullable|integer',
-            'is_sub_module' => 'required|in:Y,N',
-            'is_permission' => 'required|in:Y,N',
-            'status' => 'required|in:active,inactive',
+            'is_sub_module' => 'required|in:' . implode(',', YesNoFlag::values()),
+            'is_permission' => 'required|in:' . implode(',', YesNoFlag::values()),
+            'status' => 'required|in:' . implode(',', ActiveInactiveStatus::values()),
         ];
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ActiveInactiveStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\RoleModule\RoleModuleToggleRequest;
 use App\Http\Resources\RoleModuleMatrixResource;
@@ -20,7 +21,7 @@ class RoleModuleController extends Controller
     {
         $roles = RoleModule::roles();
 
-        $modules = Module::where('status', 'active')->get();
+        $modules = Module::where('status', ActiveInactiveStatus::ACTIVE->value)->get();
 
         $roleModules = RoleModule::all()
             ->groupBy('module_id')

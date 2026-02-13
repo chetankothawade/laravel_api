@@ -141,4 +141,3 @@ Set collection variables after import:
 - User role/status values are centralized in:
   - `app/Enums/UserRole.php`
   - `app/Enums/UserStatus.php`
-# laravel_api
