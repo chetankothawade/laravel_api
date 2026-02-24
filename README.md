@@ -1,6 +1,6 @@
 ﻿# Backend API
 
-Laravel-based backend API for the Signature Tool application.
+Laravel-based backend API for the Authentication, RBAC, Activity Logs and User Mangement application.
 
 ## Tech Stack
 
