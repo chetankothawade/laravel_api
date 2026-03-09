@@ -25,6 +25,13 @@ class ModuleResource extends JsonResource
             'status'         => $this->status,
             'created_at'     => optional($this->created_at)->format('d/m/Y h:i A'),
             'updated_at'     => optional($this->updated_at)->format('d/m/Y h:i A'),
+            'parent'         => $this->whenLoaded('parent', function () {
+                return [
+                    'id' => $this->parent?->id,
+                    'uuid' => $this->parent?->uuid,
+                    'name' => $this->parent?->name,
+                ];
+            }),
 
             // Sub-modules (if needed)
             'children'       => ModuleResource::collection($this->whenLoaded('subModules')),

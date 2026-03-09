@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use App\Traits\HasUuid;
 
 class Module extends Model
 {
-    use LogsActivity;
+    use LogsActivity, HasUuid;
 
     protected $fillable = [
         'uuid',
@@ -23,18 +24,15 @@ class Module extends Model
         'is_permission'
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->uuid = (string) Str::uuid();
-        });
-    }
-
+   
     public function subModules()
     {
         return $this->hasMany(Module::class, 'parent_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Module::class, 'parent_id');
     }
 
     public function modulePermissions()

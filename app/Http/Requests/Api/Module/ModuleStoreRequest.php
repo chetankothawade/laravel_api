@@ -11,7 +11,7 @@ class ModuleStoreRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'parent_id' => 'nullable|integer|min:0',
+            'parent_id' => 'nullable|integer|exists:modules,id|required_if:is_sub_module,Y',
             'name' => 'required|string|max:255|unique:modules,name',
             'url' => 'nullable|string|max:255',
             'icon' => 'nullable|string|max:255',

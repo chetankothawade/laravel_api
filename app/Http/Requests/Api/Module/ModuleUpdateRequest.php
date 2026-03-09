@@ -12,7 +12,7 @@ class ModuleUpdateRequest extends BaseApiRequest
     public function rules(): array
     {
         return [
-            'parent_id' => 'sometimes|nullable|integer|exists:modules,id',
+            'parent_id' => 'sometimes|nullable|integer|exists:modules,id|required_if:is_sub_module,Y',
             'name' => [
                 'sometimes',
                 'required',

@@ -26,6 +26,16 @@ class ModuleService
     {
         $query = Module::query();
         $status = $filters['status'] ?? null;
+        $parentId = $filters['parent_id'] ?? null;
+
+        if (! empty($parentId)) {
+            $query->where('parent_id', (int) $parentId)
+                ->where('is_sub_module', YesNoFlag::YES->value);
+        } else {
+            $query->where(function ($q) {
+                $q->whereNull('parent_id')->orWhere('parent_id', 0);
+            })->where('is_sub_module', YesNoFlag::NO->value);
+        }
 
         // Search by name or URL
         if (!empty($filters['search'])) {
@@ -60,7 +70,9 @@ class ModuleService
         return DB::transaction(function () use ($data) {
 
             // Create module
-            $data['parent_id'] = $data['parent_id'] == 0 ? null : $data['parent_id'];
+            $data['parent_id'] = ($data['is_sub_module'] ?? YesNoFlag::NO->value) === YesNoFlag::YES->value
+                ? (int) ($data['parent_id'] ?? 0)
+                : null;
             $module = Module::create($data);
 
             if ($data['is_sub_module'] === YesNoFlag::NO->value) {
@@ -94,6 +106,11 @@ class ModuleService
     public function updateModule(Module $module, array $data): Module
     {
         return DB::transaction(function () use ($module, $data) {
+            if (($data['is_sub_module'] ?? $module->is_sub_module) === YesNoFlag::NO->value) {
+                $data['parent_id'] = null;
+            } elseif (array_key_exists('parent_id', $data)) {
+                $data['parent_id'] = empty($data['parent_id']) ? null : (int) $data['parent_id'];
+            }
 
             // Update module fields
             $module->update($data);
@@ -121,7 +138,7 @@ class ModuleService
      */
     public function getByUuid(string $uuid): ?Module
     {
-        return Module::where('uuid', $uuid)->first();
+        return Module::with('parent')->where('uuid', $uuid)->first();
     }
     /**
      * Delete module
@@ -163,7 +180,8 @@ class ModuleService
             $q->where('parent_id', 0)
                 ->orWhereNull('parent_id');
         })
-            ->where('is_sub_module', YesNoFlag::YES->value)
+            ->where('is_sub_module', YesNoFlag::NO->value)
+            ->orderBy('seq_no')
             ->get();
     }
 

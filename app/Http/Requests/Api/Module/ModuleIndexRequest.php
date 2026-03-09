@@ -13,6 +13,7 @@ class ModuleIndexRequest extends BaseApiRequest
             'page' => 'nullable|integer|min:1',
             'search' => 'nullable|string|max:255',
             'status' => 'nullable|in:' . implode(',', ActiveInactiveStatus::values()),
+            'parent_id' => 'nullable|integer|exists:modules,id',
             'sortedField' => 'nullable|in:id,name,created_at,status,icon,url,seq_no',
             'sortedBy' => 'nullable|in:asc,desc',
             'perPage' => 'nullable|integer|min:1|max:100',
@@ -24,6 +25,7 @@ class ModuleIndexRequest extends BaseApiRequest
         return [
             'search' => $this->input('search'),
             'status' => $this->input('status'),
+            'parent_id' => $this->input('parent_id'),
             'sortedField' => $this->input('sortedField', 'id'),
             'sortedBy' => $this->input('sortedBy', 'desc'),
             'perPage' => (int) $this->input('perPage', 10),
